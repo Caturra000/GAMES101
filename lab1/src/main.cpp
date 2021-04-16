@@ -26,7 +26,13 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
     // TODO: Implement this function
     // Create the model matrix for rotating the triangle around the Z axis.
     // Then return it.
-
+    const double PI = std::acos(-1);
+    auto r = PI/180*rotation_angle;
+    model << std::cos(r), -std::sin(r), 0, 0,
+             std::sin(r),  std::cos(r), 0, 0,
+                       0,            0, 1, 0,
+                       0,            0, 0, 1;
+    std::cout << model << std::endl;
     return model;
 }
 
@@ -40,7 +46,31 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
     // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
-
+    // M_p = M_o * M_p_to_o
+    Eigen::Matrix4f M_p_to_o;
+    float n, f;
+    n = zNear, f = zFar;
+    M_p_to_o << n, 0,   0,    0,
+                0, n,   0,    0,
+                0, 0, n+f, -n*f,
+                0, 0,   1,    0;
+    // M_o = 
+    const double PI = std::acos(-1);
+    const double theta = PI/180*eye_fov;
+    
+    double lengthX = n * std::tan(theta/2) * 2;
+    double lengthY = aspect_ratio * lengthX;
+    Eigen::Matrix4f M_o, M_o1, M_o2;
+    M_o1 << 2.0/lengthX,           0,         0, 0,
+                      0, 2.0/lengthY,         0, 0,
+                      0,           0, 2.0/(n-f), 0,
+                      0,           0,         0, 1;
+    M_o2 << 1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
+    M_o = M_o1 * M_o2;
+    projection = M_o * M_p_to_o;
     return projection;
 }
 
